@@ -1,13 +1,29 @@
 #!/bin/bash
 
+BUILD_TYPE="Release"
+
 #Function to build driver
 buildDriver(){
-	local BUILD_TYPE=$1
-        cd generated
+	cd generated
 	cmake --build . --target install --config $BUILD_TYPE || return $?
     echo BUILD SUCCESS
     echo -e "\E[1;32mBUILD SUCCESS\E[;0m";
 	exit 0
+}
+
+parseArgs(){
+	while [ "$#" -gt 0 ]; do
+		case "$1" in
+			--config|-c)
+				BUILD_TYPE="$2"
+				shift 2
+				;;
+			*)
+				echo "Unknown argument: $1"
+				exit 1
+				;;
+		esac
+	done
 }
 
 #Function to handle errors
@@ -23,4 +39,5 @@ function handleError() {
 trap handleError ERR;
 
 #Main entry point
+parseArgs "$@"
 buildDriver

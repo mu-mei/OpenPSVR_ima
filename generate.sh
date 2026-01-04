@@ -8,9 +8,12 @@ set -eE
 
 # Initialise
 PROJECT_ROOT=$PWD
+TOOLCHAIN_FILE=""
 
 #Function loads configuration properties and generates project files
 main(){
+	parseArgs "$@"
+
 	# Generate the project files for PSMoveService
 	generateProjectFiles || return $?
 
@@ -27,7 +30,26 @@ generateProjectFiles(){
 	echo "Generating OpenPSVR Project files..."
 	echo "Running cmake in $PROJECT_ROOT"
 	cd $PROJECT_ROOT/generated
-	cmake .. -G "Unix Makefiles"
+	local CMAKE_ARGS=()
+	if [ -n "$TOOLCHAIN_FILE" ]; then
+		CMAKE_ARGS+=("-DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE")
+	fi
+	cmake .. -G "Unix Makefiles" "${CMAKE_ARGS[@]}"
+}
+
+parseArgs(){
+	while [ "$#" -gt 0 ]; do
+		case "$1" in
+			--toolchain)
+				TOOLCHAIN_FILE="$2"
+				shift 2
+				;;
+			*)
+				echo "Unknown argument: $1"
+				exit 1
+				;;
+		esac
+	done
 }
 
 #Function to handle errors
@@ -43,4 +65,4 @@ function handleError() {
 trap handleError ERR;
 
 # entry point of script
-main
+main "$@"
