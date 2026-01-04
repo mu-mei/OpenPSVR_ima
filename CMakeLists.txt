@@ -5,6 +5,7 @@ include(ExternalProject)
 
 set(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(THIRD_PARTY ${ROOT_DIR}/deps)
+set(LIBPSVR_ROOT ${ROOT_DIR}/third_party/libpsvr)
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 set(CMAKE_CXX_STANDARD_17)
@@ -23,9 +24,14 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 if (${CMAKE_C_SIZEOF_DATA_PTR} EQUAL 8) # 64-bit
         if(${CMAKE_SYSTEM_NAME} MATCHES "Windows") # Windows
                 download_external_dependency(libusb  ${ROOT_DIR}/deps https://github.com/libusb/libusb/releases/download/v1.0.22/libusb-1.0.22.7z)
-				download_external_dependency(libpsvr ${ROOT_DIR}/deps https://github.com/tismatis/libpsvr/releases/download/b1/libpsvr-include.zip)
-				set(LIBPSVR_REQ_LIB ${THIRD_PARTY}/libpsvr/src/libpsvr/libpsvr.lib)
-				set(LIBPSVR_INCL_DIR ${THIRD_PARTY}/libpsvr/src/libpsvr)
+				set(LIBPSVR_INCL_DIR ${LIBPSVR_ROOT}/include)
+				if (NOT EXISTS ${LIBPSVR_INCL_DIR})
+					set(LIBPSVR_INCL_DIR ${LIBPSVR_ROOT})
+				endif()
+				find_library(LIBPSVR_REQ_LIB
+					NAMES libpsvr
+					PATHS ${LIBPSVR_ROOT}/lib ${LIBPSVR_ROOT}/build ${LIBPSVR_ROOT}
+					NO_DEFAULT_PATH)
 				set(LIBUSB_REQ_LIB ${THIRD_PARTY}/libusb/src/libusb/MS64/dll/libusb-1.0.lib)
 				set(LIBUSB_REQ_SHARED_LIB ${THIRD_PARTY}/libusb/src/libusb/MS64/dll/libusb-1.0.dll)
 				set(LIBUSB_INCL_DIR ${THIRD_PARTY}/libusb/src/libusb/include/libusb-1.0)
@@ -39,12 +45,15 @@ if (${CMAKE_C_SIZEOF_DATA_PTR} EQUAL 8) # 64-bit
 					${CMAKE_CURRENT_SOURCE_DIR}/deps/libusb/src/libusb/configure
 					make -j 2
 				)
-				download_external_dependency(libpsvr 
-					${ROOT_DIR}/deps 
-					https://s3-ap-southeast-2.amazonaws.com/libpsvr-snapshot-build/SuperEvenSteven/libpsvr/14/14.1/libpsvr-linux64.tar.gz
-				)
-				set(LIBPSVR_REQ_LIB ${THIRD_PARTY}/libpsvr/src/libpsvr/build/Linux64/libpsvr/liblibpsvr.so)
-				set(LIBPSVR_INCL_DIR ${THIRD_PARTY}/libpsvr/src/libpsvr/include)
+				set(LIBPSVR_INCL_DIR ${LIBPSVR_ROOT}/include)
+				if (NOT EXISTS ${LIBPSVR_INCL_DIR})
+					set(LIBPSVR_INCL_DIR ${LIBPSVR_ROOT})
+				endif()
+				find_library(LIBPSVR_REQ_LIB
+					NAMES libpsvr liblibpsvr
+					PATHS ${LIBPSVR_ROOT}/lib ${LIBPSVR_ROOT}/build ${LIBPSVR_ROOT}
+						${LIBPSVR_ROOT}/build/Linux64/libpsvr
+					NO_DEFAULT_PATH)
 				set(LIBUSB_REQ_LIB ${THIRD_PARTY}/libusb/src/libusb-build/libusb/.libs/libusb-1.0.so)
 				set(LIBUSB_REQ_SHARED_LIB ${LIBUSB_REQ_LIB})
 				set(LIBUSB_INCL_DIR ${THIRD_PARTY}/libusb/src/libusb/libusb)

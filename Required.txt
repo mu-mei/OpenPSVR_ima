@@ -1,4 +1,3 @@
-https://github.com/alatnet/libpsvr
 https://github.com/libusb/libusb
 https://glm.g-truc.net
 https://github.com/ValveSoftware/openvr/
