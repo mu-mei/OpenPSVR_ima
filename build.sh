@@ -1,13 +1,48 @@
 #!/bin/bash
 
+PROJECT_ROOT=$PWD
+BUILD_DIR="$PROJECT_ROOT/generated"
 BUILD_TYPE="Release"
+
+get_arch_label(){
+	local system_name=""
+	local ptr_size=""
+
+	if [ -f "$BUILD_DIR/CMakeCache.txt" ]; then
+		system_name=$(awk -F= '/^CMAKE_SYSTEM_NAME:/{print $2}' "$BUILD_DIR/CMakeCache.txt")
+		ptr_size=$(awk -F= '/^CMAKE_SIZEOF_VOID_P:/{print $2}' "$BUILD_DIR/CMakeCache.txt")
+	fi
+
+	if [ "$ptr_size" = "8" ]; then
+		if [ "$system_name" = "Windows" ]; then
+			echo "Win64"
+		elif [ "$system_name" = "Darwin" ]; then
+			echo "OSX64"
+		elif [ -n "$system_name" ]; then
+			echo "Linux64"
+		fi
+	else
+		if [ "$system_name" = "Windows" ]; then
+			echo "Win32"
+		elif [ "$system_name" = "Darwin" ]; then
+			echo "OSX32"
+		elif [ -n "$system_name" ]; then
+			echo "Linux32"
+		fi
+	fi
+}
 
 #Function to build driver
 buildDriver(){
-	cd generated
+	cd "$BUILD_DIR"
 	cmake --build . --target install --config $BUILD_TYPE || return $?
     echo BUILD SUCCESS
     echo -e "\E[1;32mBUILD SUCCESS\E[;0m";
+	local arch_label
+	arch_label=$(get_arch_label)
+	if [ -n "$arch_label" ]; then
+		echo "Output: $PROJECT_ROOT/build/$arch_label/openpsvr"
+	fi
 	exit 0
 }
 
