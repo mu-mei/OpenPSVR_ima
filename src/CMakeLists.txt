@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 # initialise variables
 set(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 set(PROJECT_SRC_DIR ${ROOT_DIR}/src)
-set(TARGET_BUILD_DIR ${ROOT_DIR}/build)
+set(TARGET_BUILD_DIR ${OPENPSVR_OUTPUT_ROOT})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 # Set OpenPSVR's project source files
@@ -69,8 +69,10 @@ else()
 endif()
 
 # Define OpenPSVR install target
+set(OPENPSVR_INSTALL_ROOT "${TARGET_BUILD_DIR}/${ARCH_LABEL}/openpsvr")
+set(OPENPSVR_BIN_DIR "${OPENPSVR_INSTALL_ROOT}/bin/${ARCH_LABEL}")
 install(TARGETS OpenPSVR
-        RUNTIME DESTINATION ${TARGET_BUILD_DIR}/${ARCH_LABEL}/openpsvr/bin/${ARCH_LABEL}
+        RUNTIME DESTINATION ${OPENPSVR_BIN_DIR}
         LIBRARY DESTINATION ${TARGET_BUILD_DIR}/${ARCH_LABEL}/lib
         ARCHIVE DESTINATION ${TARGET_BUILD_DIR}/${ARCH_LABEL}/lib
 )
@@ -78,27 +80,27 @@ install(TARGETS OpenPSVR
 # Copy driver vr manifest
 install(
         FILES ${ROOT_DIR}/driver/driver.vrdrivermanifest
-        DESTINATION ${TARGET_BUILD_DIR}/${ARCH_LABEL}/openpsvr
+        DESTINATION ${OPENPSVR_INSTALL_ROOT}
 )
 
 # Copy driver icon resources
 install(
         DIRECTORY ${ROOT_DIR}/driver/resources/icons
-        DESTINATION ${TARGET_BUILD_DIR}/${ARCH_LABEL}/openpsvr/resources
+        DESTINATION ${OPENPSVR_INSTALL_ROOT}/resources
         FILES_MATCHING PATTERN "*.png" 
 )
 
 #  Copy the driver default settings
 install(
         DIRECTORY ${ROOT_DIR}/driver/resources/settings
-        DESTINATION ${TARGET_BUILD_DIR}/${ARCH_LABEL}/openpsvr/resources
+        DESTINATION ${OPENPSVR_INSTALL_ROOT}/resources
         FILES_MATCHING PATTERN "*.vrsettings" 
 )
 
 #  Copy Windows runtime DLLs
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
         set(WINDOWS_RUNTIME_DLLS "")
-        if(LIBUSB_REQ_SHARED_LIB)
+        if(LIBUSB_REQ_SHARED_LIB AND EXISTS "${LIBUSB_REQ_SHARED_LIB}")
                 list(APPEND WINDOWS_RUNTIME_DLLS ${LIBUSB_REQ_SHARED_LIB})
         endif()
         if(EXISTS "${OPENVR_BINARIES_DIR}/openvr_api.dll")
@@ -107,7 +109,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
         if(WINDOWS_RUNTIME_DLLS)
                 install(
                         FILES ${WINDOWS_RUNTIME_DLLS}
-                        DESTINATION ${TARGET_BUILD_DIR}/${ARCH_LABEL}/openpsvr/bin/${ARCH_LABEL}
+                        DESTINATION ${OPENPSVR_BIN_DIR}
                 )
         endif()
 endif()
