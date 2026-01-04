@@ -2,7 +2,14 @@ cmake_minimum_required(VERSION 3.2)
 project(OpenPSVR VERSION 0.1.0)
 
 set(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
-set(THIRD_PARTY ${ROOT_DIR}/third_party)
+set(THIRD_PARTY "${ROOT_DIR}/third_party" CACHE PATH "Path to prebuilt third-party dependencies.")
+
+if (NOT EXISTS "${THIRD_PARTY}")
+    message(FATAL_ERROR
+        "Third-party dependencies were not found at '${THIRD_PARTY}'. "
+        "Populate this directory with OpenVR, GLM, libusb, and libpsvr, or "
+        "configure -DTHIRD_PARTY=/path/to/third_party before running CMake.")
+endif()
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 set(CMAKE_CXX_STANDARD_17)
