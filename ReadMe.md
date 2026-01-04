@@ -23,6 +23,8 @@ Install the following environment specific requirements.
 - [CMake](https://cmake.org/download/)
 - [libudev-dev](https://packages.ubuntu.com/trusty/libudev-dev)
 
+Linux環境では、依存ライブラリを `third_party` 配下に事前配置することで、ビルド中の追加ダウンロードは不要です。
+
 ### Build System
 #### Project Structure
 ```
@@ -76,10 +78,21 @@ For those comfortable with using a terminal or command prompt:
 
 ##### Linux
 1. Clone repo `git clone https://github.com/alatnet/OpenPSVR.git`
-2. Install libusbdev required to compile libusb dependency `sudo apt-get install libudev-deb`
-3. Clean and Generate make files `./clean.sh && ./generate.sh`
-4. Build driver `build.sh`, you should get a `Build Successful` message. The driver is built and ready to install.
-5. Deploy the driver locally (TODO)
+2. Install required packages `sudo apt-get install libudev-dev`
+3. Prepare local dependencies (no downloads during build): place sources/binaries under `third_party`
+   - `third_party/libpsvr` (headers + binaries; see `third_party/libpsvr/README.md`)
+   - `third_party/openvr/src/openvr`
+   - `third_party/glm/src/glm`
+   - `third_party/libusb/src/libusb` (source tree used by CMake)
+4. Clean and generate make files without downloading dependencies
+   ```
+   ./clean.sh
+   mkdir -p generated
+   cd generated
+   cmake .. -G "Unix Makefiles" -DOPENPSVR_DOWNLOAD_DEPENDENCIES=OFF
+   ```
+5. Build driver `build.sh`, you should get a `Build Successful` message. The driver is built and ready to install.
+6. Deploy the driver locally (TODO)
 
 ### Modifying the Source Code
 Changes to source code should always be done from the `src` folder and not the `generated` source folder.
