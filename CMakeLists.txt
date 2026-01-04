@@ -4,6 +4,7 @@ project(OpenPSVR VERSION 0.1.0)
 set(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(THIRD_PARTY ${ROOT_DIR}/third_party)
 set(LIBPSVR_ROOT ${ROOT_DIR}/third_party/libpsvr)
+set(OPENPSVR_OUTPUT_ROOT "${ROOT_DIR}/build" CACHE PATH "Output root for OpenPSVR install artifacts.")
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 set(CMAKE_CXX_STANDARD_17)

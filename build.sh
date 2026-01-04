@@ -32,6 +32,20 @@ get_arch_label(){
 	fi
 }
 
+get_output_root(){
+	local output_root=""
+
+	if [ -f "$BUILD_DIR/CMakeCache.txt" ]; then
+		output_root=$(awk -F= '/^OPENPSVR_OUTPUT_ROOT:PATH=/{print $2}' "$BUILD_DIR/CMakeCache.txt")
+	fi
+
+	if [ -z "$output_root" ]; then
+		output_root="$PROJECT_ROOT/build"
+	fi
+
+	echo "$output_root"
+}
+
 #Function to build driver
 buildDriver(){
 	cd "$BUILD_DIR"
@@ -41,7 +55,9 @@ buildDriver(){
 	local arch_label
 	arch_label=$(get_arch_label)
 	if [ -n "$arch_label" ]; then
-		echo "Output: $PROJECT_ROOT/build/$arch_label/openpsvr"
+		local output_root
+		output_root=$(get_output_root)
+		echo "Output: $output_root/$arch_label/openpsvr"
 	fi
 	exit 0
 }
