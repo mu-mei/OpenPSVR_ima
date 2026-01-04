@@ -96,7 +96,7 @@ install(
 )
 
 #  Copy Windows runtime DLLs
-if(WIN32)
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
         set(WINDOWS_RUNTIME_DLLS "")
         if(LIBUSB_REQ_SHARED_LIB)
                 list(APPEND WINDOWS_RUNTIME_DLLS ${LIBUSB_REQ_SHARED_LIB})

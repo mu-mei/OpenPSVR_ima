@@ -37,15 +37,42 @@ generateProjectFiles(){
 	cmake .. -G "Unix Makefiles" "${CMAKE_ARGS[@]}"
 }
 
+showUsage(){
+	echo "Usage: $0 [--toolchain <path|name>]"
+	echo "  --toolchain  Path to a CMake toolchain file or a name in cmake/toolchains."
+}
+
+resolveToolchainFile(){
+	local candidate="$1"
+	if [ -z "$candidate" ]; then
+		echo "Error: --toolchain requires a value."
+		showUsage
+		exit 1
+	fi
+	if [ -f "$candidate" ]; then
+		TOOLCHAIN_FILE="$candidate"
+		return
+	fi
+	if [ -f "$PROJECT_ROOT/cmake/toolchains/${candidate}.cmake" ]; then
+		TOOLCHAIN_FILE="$PROJECT_ROOT/cmake/toolchains/${candidate}.cmake"
+		return
+	fi
+
+	echo "Error: toolchain file not found: $candidate"
+	showUsage
+	exit 1
+}
+
 parseArgs(){
 	while [ "$#" -gt 0 ]; do
 		case "$1" in
 			--toolchain)
-				TOOLCHAIN_FILE="$2"
+				resolveToolchainFile "$2"
 				shift 2
 				;;
 			*)
 				echo "Unknown argument: $1"
+				showUsage
 				exit 1
 				;;
 		esac
