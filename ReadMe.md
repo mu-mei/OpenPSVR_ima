@@ -11,6 +11,8 @@ The following features will be added:
 ## Building from Source
 ### Build Requirements
 Install the following environment specific requirements.
+#### Common
+- Place the libpsvr headers and binaries under `third_party/libpsvr` (see `third_party/libpsvr/README.md` for layout).
 #### Windows
 - [Visual Studio 2022](https://www.visualstudio.com/vs/community/)
 - [CMake](https://cmake.org/download/)
@@ -45,7 +47,7 @@ The project's build process is scripted in OS specific shell/batch scripts that 
 The build scripts used to clean, generate and build the source code are:
 
 * *clean* - cleans the project folder by deleting the deps, generated and build folder
-* *generate* - downloads dependencies and generates project files
+* *generate* - generates project files (CMake downloads libusb/openvr/glm as needed; libpsvr is expected in `third_party/libpsvr`)
 * *build* - compiles the driver for use in SteamVR
 
 The generated folders are:
@@ -57,7 +59,7 @@ The generated folders are:
 The process is defined below simply as:
 
 1. Generate project files
-2. Download dependencies (3rd-party libraries)
+2. Download dependencies (3rd-party libraries, except libpsvr which must be provided locally)
 3. Build project binaries (the driver)
 
 **Note**: the use of [Microsoft VCPKG](https://github.com/Microsoft/vcpkg) appears to be a similar simplified solution for future consideration. Using this would simplify defining the header libraries, and binary path definitions.
