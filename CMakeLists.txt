@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 3.2)
 project(OpenPSVR VERSION 0.1.0)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CMakeUtils.txt)
-include(ExternalProject)
 
 set(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
-set(THIRD_PARTY ${ROOT_DIR}/deps)
+set(THIRD_PARTY ${ROOT_DIR}/third_party)
 set(LIBPSVR_ROOT ${ROOT_DIR}/third_party/libpsvr)
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -23,7 +21,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 # Configure and build platform specific external 3rdParty projects from their respective released packages
 if (${CMAKE_C_SIZEOF_DATA_PTR} EQUAL 8) # 64-bit
         if(${CMAKE_SYSTEM_NAME} MATCHES "Windows") # Windows
-                download_external_dependency(libusb  ${ROOT_DIR}/deps https://github.com/libusb/libusb/releases/download/v1.0.22/libusb-1.0.22.7z)
 				set(LIBPSVR_INCL_DIR ${LIBPSVR_ROOT}/include)
 				if (NOT EXISTS ${LIBPSVR_INCL_DIR})
 					set(LIBPSVR_INCL_DIR ${LIBPSVR_ROOT})
@@ -36,15 +33,8 @@ if (${CMAKE_C_SIZEOF_DATA_PTR} EQUAL 8) # 64-bit
 				set(LIBUSB_REQ_SHARED_LIB ${THIRD_PARTY}/libusb/src/libusb/MS64/dll/libusb-1.0.dll)
 				set(LIBUSB_INCL_DIR ${THIRD_PARTY}/libusb/src/libusb/include/libusb-1.0)
         elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # OSX
-				build_external_project(libusb ${ROOT_DIR}/deps https://github.com/libusb/libusb/releases/download/v1.0.22/libusb-1.0.22.tar.bz2)#
 				# TODO add OSX dependencies
         else()# Linux
-				build_external_dependecy(libusb 
-					${ROOT_DIR}/deps 
-					https://github.com/libusb/libusb/releases/download/v1.0.22/libusb-1.0.22.tar.bz2
-					${CMAKE_CURRENT_SOURCE_DIR}/deps/libusb/src/libusb/configure
-					make -j 2
-				)
 				set(LIBPSVR_INCL_DIR ${LIBPSVR_ROOT}/include)
 				if (NOT EXISTS ${LIBPSVR_INCL_DIR})
 					set(LIBPSVR_INCL_DIR ${LIBPSVR_ROOT})
@@ -60,14 +50,9 @@ if (${CMAKE_C_SIZEOF_DATA_PTR} EQUAL 8) # 64-bit
 endif()
 
 # OpenVR Cross-platform Dependency
-download_external_dependency(openvr
-	${ROOT_DIR}/deps 
-	https://github.com/ValveSoftware/openvr/archive/v1.0.13.zip)
+set(OPENVR_ROOT_DIR ${THIRD_PARTY}/openvr/src/openvr)
 
 # GLM Cross-platform Dependency
-download_external_dependency(glm     
-	${ROOT_DIR}/deps 
-	https://github.com/g-truc/glm/releases/download/0.9.8.5/glm-0.9.8.5.7z)
 set(GLM_INCL_DIR ${THIRD_PARTY}/glm/src/glm/glm)
 
 add_subdirectory(src)
