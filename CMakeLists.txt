@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 3.2)
 project(OpenPSVR VERSION 0.1.0)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CMakeUtils.txt)
-include(ExternalProject)
 
 set(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
-set(THIRD_PARTY ${ROOT_DIR}/deps)
+set(THIRD_PARTY ${ROOT_DIR}/third_party)
 set(LIBPSVR_ROOT ${ROOT_DIR}/third_party/libpsvr)
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -20,10 +18,36 @@ ENDIF()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+option(OPENPSVR_DOWNLOAD_DEPENDENCIES "Download missing OpenVR/GLM sources into third_party." ON)
+
+function(openpsvr_ensure_dependency name repo_url dest_dir)
+    if (EXISTS "${dest_dir}")
+        return()
+    endif()
+    if (NOT OPENPSVR_DOWNLOAD_DEPENDENCIES)
+        message(FATAL_ERROR "${name} was not found at ${dest_dir}. Populate third_party or enable OPENPSVR_DOWNLOAD_DEPENDENCIES.")
+    endif()
+    find_program(GIT_EXECUTABLE git)
+    if (NOT GIT_EXECUTABLE)
+        message(FATAL_ERROR "Git is required to download ${name}. Install git or populate third_party manually.")
+    endif()
+    get_filename_component(dest_parent "${dest_dir}" DIRECTORY)
+    file(MAKE_DIRECTORY "${dest_parent}")
+    message(STATUS "Downloading ${name} from ${repo_url} into ${dest_dir}")
+    execute_process(
+        COMMAND "${GIT_EXECUTABLE}" clone --depth 1 "${repo_url}" "${dest_dir}"
+        RESULT_VARIABLE clone_result
+        OUTPUT_VARIABLE clone_output
+        ERROR_VARIABLE clone_error
+    )
+    if (NOT clone_result EQUAL 0)
+        message(FATAL_ERROR "Failed to download ${name}: ${clone_error}\n${clone_output}")
+    endif()
+endfunction()
+
 # Configure and build platform specific external 3rdParty projects from their respective released packages
 if (${CMAKE_C_SIZEOF_DATA_PTR} EQUAL 8) # 64-bit
         if(${CMAKE_SYSTEM_NAME} MATCHES "Windows") # Windows
-                download_external_dependency(libusb  ${ROOT_DIR}/deps https://github.com/libusb/libusb/releases/download/v1.0.22/libusb-1.0.22.7z)
 				set(LIBPSVR_INCL_DIR ${LIBPSVR_ROOT}/include)
 				set(LIBPSVR_LIB_DIR ${LIBPSVR_ROOT}/lib)
 				set(LIBPSVR_REQ_LIB "")
@@ -45,15 +69,8 @@ if (${CMAKE_C_SIZEOF_DATA_PTR} EQUAL 8) # 64-bit
 				set(LIBUSB_REQ_SHARED_LIB ${THIRD_PARTY}/libusb/src/libusb/MS64/dll/libusb-1.0.dll)
 				set(LIBUSB_INCL_DIR ${THIRD_PARTY}/libusb/src/libusb/include/libusb-1.0)
         elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # OSX
-				build_external_project(libusb ${ROOT_DIR}/deps https://github.com/libusb/libusb/releases/download/v1.0.22/libusb-1.0.22.tar.bz2)#
 				# TODO add OSX dependencies
         else()# Linux
-				build_external_dependecy(libusb 
-					${ROOT_DIR}/deps 
-					https://github.com/libusb/libusb/releases/download/v1.0.22/libusb-1.0.22.tar.bz2
-					${CMAKE_CURRENT_SOURCE_DIR}/deps/libusb/src/libusb/configure
-					make -j 2
-				)
 				set(LIBPSVR_INCL_DIR ${LIBPSVR_ROOT}/include)
 				set(LIBPSVR_LIB_DIR ${LIBPSVR_ROOT}/lib)
 				set(LIBPSVR_REQ_LIB "")
@@ -77,14 +94,11 @@ if (${CMAKE_C_SIZEOF_DATA_PTR} EQUAL 8) # 64-bit
 endif()
 
 # OpenVR Cross-platform Dependency
-download_external_dependency(openvr
-	${ROOT_DIR}/deps 
-	https://github.com/ValveSoftware/openvr/archive/v1.0.13.zip)
+set(OPENVR_ROOT_DIR ${THIRD_PARTY}/openvr/src/openvr)
+openpsvr_ensure_dependency("OpenVR" "https://github.com/ValveSoftware/openvr.git" "${OPENVR_ROOT_DIR}")
 
 # GLM Cross-platform Dependency
-download_external_dependency(glm     
-	${ROOT_DIR}/deps 
-	https://github.com/g-truc/glm/releases/download/0.9.8.5/glm-0.9.8.5.7z)
 set(GLM_INCL_DIR ${THIRD_PARTY}/glm/src/glm/glm)
+openpsvr_ensure_dependency("GLM" "https://github.com/g-truc/glm.git" "${THIRD_PARTY}/glm/src/glm")
 
 add_subdirectory(src)
