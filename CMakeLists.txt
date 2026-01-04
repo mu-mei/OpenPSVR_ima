@@ -46,7 +46,6 @@ if (${CMAKE_C_SIZEOF_DATA_PTR} EQUAL 8) # 64-bit
 				set(LIBPSVR_REQ_LIB ${THIRD_PARTY}/libpsvr/src/libpsvr/build/Linux64/libpsvr/liblibpsvr.so)
 				set(LIBPSVR_INCL_DIR ${THIRD_PARTY}/libpsvr/src/libpsvr/include)
 				set(LIBUSB_REQ_LIB ${THIRD_PARTY}/libusb/src/libusb-build/libusb/.libs/libusb-1.0.so)
-				set(LIBUSB_REQ_SHARED_LIB ${LIBUSB_REQ_LIB})
 				set(LIBUSB_INCL_DIR ${THIRD_PARTY}/libusb/src/libusb/libusb)
         endif()
 endif()

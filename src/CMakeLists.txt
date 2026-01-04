@@ -95,9 +95,19 @@ install(
         FILES_MATCHING PATTERN "*.vrsettings" 
 )
 
-#  Copy the libusb dll
-install(
-        FILES ${LIBUSB_REQ_SHARED_LIB}
-        DESTINATION ${TARGET_BUILD_DIR}/${ARCH_LABEL}/openpsvr/bin/${ARCH_LABEL}
-)
-
+#  Copy Windows runtime DLLs
+if(WIN32)
+        set(WINDOWS_RUNTIME_DLLS "")
+        if(LIBUSB_REQ_SHARED_LIB)
+                list(APPEND WINDOWS_RUNTIME_DLLS ${LIBUSB_REQ_SHARED_LIB})
+        endif()
+        if(EXISTS "${OPENVR_BINARIES_DIR}/openvr_api.dll")
+                list(APPEND WINDOWS_RUNTIME_DLLS "${OPENVR_BINARIES_DIR}/openvr_api.dll")
+        endif()
+        if(WINDOWS_RUNTIME_DLLS)
+                install(
+                        FILES ${WINDOWS_RUNTIME_DLLS}
+                        DESTINATION ${TARGET_BUILD_DIR}/${ARCH_LABEL}/openpsvr/bin/${ARCH_LABEL}
+                )
+        endif()
+endif()
