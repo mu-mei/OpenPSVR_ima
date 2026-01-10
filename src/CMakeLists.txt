@@ -39,14 +39,13 @@ message(${GLM_INCL_DIR})
 # Set OpenPSVR's required 3rdParty include directories
 target_include_directories(OpenPSVR PUBLIC ${OPENVR_INCLUDE_DIR} 
                                            ${GLM_INCL_DIR}
-                                           ${LIBPSVR_INCL_DIR}
 										   ${LIBUSB_INCL_DIR}
 )
 
 # Set OpenPSVR's required 3rdParty libraries
-target_link_libraries(OpenPSVR ${OPENVR_LIBRARIES}
-                               ${LIBPSVR_REQ_LIB}
-							   ${LIBUSB_REQ_LIB}
+target_link_libraries(OpenPSVR PUBLIC ${OPENVR_LIBRARIES}
+                                      psvr
+									  ${LIBUSB_REQ_LIB}
 )
 
 # Shared architecture label used for install folder locations
