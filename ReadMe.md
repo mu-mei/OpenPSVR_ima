@@ -23,7 +23,7 @@ Install the following environment specific requirements.
 - [CMake](https://cmake.org/download/)
 - [libudev-dev](https://packages.ubuntu.com/trusty/libudev-dev)
 
-Linux環境では、依存ライブラリを `third_party` 配下に事前配置することで、ビルド中の追加ダウンロードは不要です。
+Linux環境では、依存ライブラリを `third_party` 配下に事前配置する前提で、ビルド中の追加ダウンロードは発生しません。
 
 ### Build System
 #### Project Structure
@@ -48,21 +48,20 @@ The project's build process is scripted in OS specific shell/batch scripts that 
 #### Build System Scripts
 The build scripts used to clean, generate and build the source code are:
 
-* *clean* - cleans the project folder by deleting the deps, generated and build folder
-* *generate* - generates project files (CMake downloads libusb/openvr/glm as needed; libpsvr is expected in `third_party/libpsvr`)
-* *build* - compiles the driver for use in SteamVR
+* *clean* - 生成物を削除してプロジェクトフォルダを初期化します（legacyな `deps` が存在すれば削除）
+* *generate* - `third_party` 配下の依存ライブラリを使ってプロジェクトファイルを生成します
+* *build* - SteamVR 用のドライバをビルドします
 
-The generated folders are:
+生成されるフォルダは以下の通りです:
 
-* *deps* - the place where dependencies are downloaded to
 * *generated* - CMake creates the project files i.e. MSVS solution or GNU Make folder.
 * *build* - the compiled driver binaries and driver resources are placed here
 
-The process is defined below simply as:
+手順は以下の通りです:
 
-1. Generate project files
-2. Download dependencies (3rd-party libraries, except libpsvr which must be provided locally)
-3. Build project binaries (the driver)
+1. プロジェクトファイルを生成
+2. 依存ライブラリを `third_party` に配置
+3. ドライバをビルド
 
 **Note**: the use of [Microsoft VCPKG](https://github.com/Microsoft/vcpkg) appears to be a similar simplified solution for future consideration. Using this would simplify defining the header libraries, and binary path definitions.
 
@@ -79,17 +78,17 @@ For those comfortable with using a terminal or command prompt:
 ##### Linux
 1. Clone repo `git clone https://github.com/alatnet/OpenPSVR.git`
 2. Install required packages `sudo apt-get install libudev-dev`
-3. Prepare local dependencies (no downloads during build): place sources/binaries under `third_party`
+3. 依存ライブラリを `third_party` 配下に配置
    - `third_party/libpsvr` (headers + binaries; see `third_party/libpsvr/README.md`)
-   - `third_party/openvr/src/openvr`
-   - `third_party/glm/src/glm`
-   - `third_party/libusb/src/libusb` (source tree used by CMake)
-4. Clean and generate make files without downloading dependencies
+   - `third_party/openvr`
+   - `third_party/glm`
+   - `third_party/libusb`
+4. クリーンして生成
    ```
    ./clean.sh
    mkdir -p generated
    cd generated
-   cmake .. -G "Unix Makefiles" -DOPENPSVR_DOWNLOAD_DEPENDENCIES=OFF
+   cmake .. -G "Unix Makefiles"
    ```
 5. Build driver `build.sh`, you should get a `Build Successful` message. The driver is built and ready to install.
 6. Deploy the driver locally (TODO)
